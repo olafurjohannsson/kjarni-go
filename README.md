@@ -6,6 +6,8 @@ Text classification, embeddings, semantic search, and reranking for Go. No Pytho
 go get github.com/olafurjohannsson/kjarni-go
 ```
 
+![Kjarni Demo](kjarni-demo.gif)
+
 Models download automatically on first use and are cached locally.
 
 ## Classify
