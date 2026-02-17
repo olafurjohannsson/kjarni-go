@@ -2,9 +2,6 @@
 
 Text classification, embeddings, semantic search, and reranking for Go. No Python, no containers, no ONNX. One `go get` and you're running inference.
 
-```
-go get github.com/olafurjohannsson/kjarni-go
-```
 
 ![Kjarni Demo](kjarni-demo.gif)
 # Kjarni inference engine
@@ -16,12 +13,26 @@ Models download automatically on first use and are cached locally.
 ## Classify
 
 ```go
-c, _ := kjarni.NewClassifier("roberta-sentiment", kjarni.WithQuiet(true))
-defer c.Close()
+package main
 
-result, _ := c.Classify("I love this product!")
-fmt.Println(result)
-// positive (98.5%)
+import (
+    "fmt"
+    "github.com/olafurjohannsson/kjarni-go"
+)
+
+func main() {
+    c, _ := kjarni.NewClassifier("roberta-sentiment")
+    defer c.Close()
+
+    text := "I’m pretty sure there’s a lot more to life than being really, really, ridiculously good looking."
+    result, _ := c.Classify(text)
+
+    fmt.Printf("Label: %s\nScore: %.3f\n\nAll scores:\n", result.Label, result.Score)
+    for _, s := range result.AllScores {
+        fmt.Printf("  %s: %.3f\n", s.Label, s.Score)
+    }
+}
+
 ```
 
 Available models: `distilbert-sentiment`, `roberta-sentiment`, `bert-sentiment-multilingual`, `distilroberta-emotion`, `roberta-emotions`, `toxic-bert`
@@ -29,18 +40,25 @@ Available models: `distilbert-sentiment`, `roberta-sentiment`, `bert-sentiment-m
 ## Embeddings
 
 ```go
-e, _ := kjarni.NewEmbedder("minilm-l6-v2", kjarni.WithQuiet(true))
-defer e.Close()
+package main
 
-sim, _ := e.Similarity("doctor", "physician")
-fmt.Printf("%.4f\n", sim)
-// 0.8598
+import (
+    "fmt"
+    "github.com/olafurjohannsson/kjarni-go"
+)
 
-vec, _ := e.Encode("hello world")
-fmt.Println(len(vec))
-// 384
+func main() {
+    e, _ := kjarni.NewEmbedder("minilm-l6-v2")
+    defer e.Close()
 
-vecs, _ := e.EncodeBatch([]string{"cat", "dog", "airplane"})
+    word1 := "doctor"
+    word2 := "physician"
+
+    sim, _ := e.Similarity(word1, word2)
+
+    fmt.Printf("Word 1: %s\nWord 2: %s\nSimilarity: %.1f%%\n", word1, word2, sim*100)
+}
+
 ```
 
 Available models: `minilm-l6-v2` (384d), `mpnet-base-v2` (768d), `distilbert-base` (768d)
