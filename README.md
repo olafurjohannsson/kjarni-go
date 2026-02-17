@@ -7,6 +7,9 @@ go get github.com/olafurjohannsson/kjarni-go
 ```
 
 ![Kjarni Demo](kjarni-demo.gif)
+# Kjarni inference engine
+
+This go library uses the custom built [Kjarni](https://github.com/olafurjohannsson/kjarni) engine to do inference
 
 Models download automatically on first use and are cached locally.
 
