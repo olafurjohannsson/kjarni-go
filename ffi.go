@@ -128,119 +128,162 @@ func initFFI() error {
 	}
 
 	// Error handling
-	purego.RegisterLibFunc(&_lastErrorMessage, handle, "kjarni_last_error_message")
-	purego.RegisterLibFunc(&_clearError, handle, "kjarni_clear_error")
+	sym, err := findSymbol(handle, "kjarni_last_error_message")
+	if err != nil {
+		return err
+	}
+	purego.RegisterFunc(&_lastErrorMessage, sym)
+
+	sym, err = findSymbol(handle, "kjarni_clear_error")
+	if err != nil {
+		return err
+	}
+	purego.RegisterFunc(&_clearError, sym)
 
 	// Classifier
-	_classifierNewSym, err = purego.Dlsym(handle, "kjarni_classifier_new")
+	_classifierNewSym, err = findSymbol(handle, "kjarni_classifier_new")
 	if err != nil {
 		return err
 	}
-	purego.RegisterLibFunc(&_classifierFree, handle, "kjarni_classifier_free")
-	_classifierClassifySym, err = purego.Dlsym(handle, "kjarni_classifier_classify")
-	if err != nil {
-		return err
-	}
-	purego.RegisterLibFunc(&_classifierNumLabels, handle, "kjarni_classifier_num_labels")
 
-	// class_results_free takes the struct by value (2 fields: ptr + len)
-	_classResultsFreeSym, err := purego.Dlsym(handle, "kjarni_class_results_free")
+	sym, err = findSymbol(handle, "kjarni_classifier_free")
 	if err != nil {
 		return err
 	}
-	_ = _classResultsFreeSym // used via SyscallN
-	// Store it 
-	_classResultsFreeSymGlobal = _classResultsFreeSym
+	purego.RegisterFunc(&_classifierFree, sym)
+
+	_classifierClassifySym, err = findSymbol(handle, "kjarni_classifier_classify")
+	if err != nil {
+		return err
+	}
+
+	sym, err = findSymbol(handle, "kjarni_classifier_num_labels")
+	if err != nil {
+		return err
+	}
+	purego.RegisterFunc(&_classifierNumLabels, sym)
+
+	_classResultsFreeSymGlobal, err = findSymbol(handle, "kjarni_class_results_free")
+	if err != nil {
+		return err
+	}
 
 	// Embedder
-	_embedderNewSym, err = purego.Dlsym(handle, "kjarni_embedder_new")
+	_embedderNewSym, err = findSymbol(handle, "kjarni_embedder_new")
 	if err != nil {
 		return err
 	}
-	purego.RegisterLibFunc(&_embedderFree, handle, "kjarni_embedder_free")
-	_embedderEncodeSym, err = purego.Dlsym(handle, "kjarni_embedder_encode")
-	if err != nil {
-		return err
-	}
-	_embedderEncodeBatchSym, err = purego.Dlsym(handle, "kjarni_embedder_encode_batch")
-	if err != nil {
-		return err
-	}
-	_embedderSimilaritySym, err = purego.Dlsym(handle, "kjarni_embedder_similarity")
-	if err != nil {
-		return err
-	}
-	purego.RegisterLibFunc(&_embedderDim, handle, "kjarni_embedder_dim")
 
-	floatArrayFreeSym, err := purego.Dlsym(handle, "kjarni_float_array_free")
+	sym, err = findSymbol(handle, "kjarni_embedder_free")
 	if err != nil {
 		return err
 	}
-	_floatArrayFreeSym = floatArrayFreeSym
+	purego.RegisterFunc(&_embedderFree, sym)
 
-	float2DArrayFreeSym, err := purego.Dlsym(handle, "kjarni_float_2d_array_free")
+	_embedderEncodeSym, err = findSymbol(handle, "kjarni_embedder_encode")
 	if err != nil {
 		return err
 	}
-	_float2DArrayFreeSym = float2DArrayFreeSym
+
+	_embedderEncodeBatchSym, err = findSymbol(handle, "kjarni_embedder_encode_batch")
+	if err != nil {
+		return err
+	}
+
+	_embedderSimilaritySym, err = findSymbol(handle, "kjarni_embedder_similarity")
+	if err != nil {
+		return err
+	}
+
+	sym, err = findSymbol(handle, "kjarni_embedder_dim")
+	if err != nil {
+		return err
+	}
+	purego.RegisterFunc(&_embedderDim, sym)
+
+	_floatArrayFreeSym, err = findSymbol(handle, "kjarni_float_array_free")
+	if err != nil {
+		return err
+	}
+
+	_float2DArrayFreeSym, err = findSymbol(handle, "kjarni_float_2d_array_free")
+	if err != nil {
+		return err
+	}
 
 	// Reranker
-	_rerankerNewSym, err = purego.Dlsym(handle, "kjarni_reranker_new")
-	if err != nil {
-		return err
-	}
-	purego.RegisterLibFunc(&_rerankerFree, handle, "kjarni_reranker_free")
-	_rerankerScoreSym, err = purego.Dlsym(handle, "kjarni_reranker_score")
-	if err != nil {
-		return err
-	}
-	_rerankerRerankSym, err = purego.Dlsym(handle, "kjarni_reranker_rerank")
-	if err != nil {
-		return err
-	}
-	_rerankerRerankTopKSym, err = purego.Dlsym(handle, "kjarni_reranker_rerank_top_k")
+	_rerankerNewSym, err = findSymbol(handle, "kjarni_reranker_new")
 	if err != nil {
 		return err
 	}
 
-	rerankResultsFreeSym, err := purego.Dlsym(handle, "kjarni_rerank_results_free")
+	sym, err = findSymbol(handle, "kjarni_reranker_free")
 	if err != nil {
 		return err
 	}
-	_rerankResultsFreeSym = rerankResultsFreeSym
+	purego.RegisterFunc(&_rerankerFree, sym)
+
+	_rerankerScoreSym, err = findSymbol(handle, "kjarni_reranker_score")
+	if err != nil {
+		return err
+	}
+
+	_rerankerRerankSym, err = findSymbol(handle, "kjarni_reranker_rerank")
+	if err != nil {
+		return err
+	}
+
+	_rerankerRerankTopKSym, err = findSymbol(handle, "kjarni_reranker_rerank_top_k")
+	if err != nil {
+		return err
+	}
+
+	_rerankResultsFreeSym, err = findSymbol(handle, "kjarni_rerank_results_free")
+	if err != nil {
+		return err
+	}
 
 	// Indexer
-	_indexerNewSym, err = purego.Dlsym(handle, "kjarni_indexer_new")
+	_indexerNewSym, err = findSymbol(handle, "kjarni_indexer_new")
 	if err != nil {
 		return err
 	}
-	purego.RegisterLibFunc(&_indexerFree, handle, "kjarni_indexer_free")
-	_indexerCreateSym, err = purego.Dlsym(handle, "kjarni_indexer_create")
+
+	sym, err = findSymbol(handle, "kjarni_indexer_free")
+	if err != nil {
+		return err
+	}
+	purego.RegisterFunc(&_indexerFree, sym)
+
+	_indexerCreateSym, err = findSymbol(handle, "kjarni_indexer_create")
 	if err != nil {
 		return err
 	}
 
 	// Searcher
-	_searcherNewSym, err = purego.Dlsym(handle, "kjarni_searcher_new")
-	if err != nil {
-		return err
-	}
-	purego.RegisterLibFunc(&_searcherFree, handle, "kjarni_searcher_free")
-	_searcherSearchWithOptionsSym, err = purego.Dlsym(handle, "kjarni_searcher_search_with_options")
+	_searcherNewSym, err = findSymbol(handle, "kjarni_searcher_new")
 	if err != nil {
 		return err
 	}
 
-	searchResultsFreeSym, err := purego.Dlsym(handle, "kjarni_search_results_free")
+	sym, err = findSymbol(handle, "kjarni_searcher_free")
 	if err != nil {
 		return err
 	}
-	_searchResultsFreeSym = searchResultsFreeSym
+	purego.RegisterFunc(&_searcherFree, sym)
 
+	_searcherSearchWithOptionsSym, err = findSymbol(handle, "kjarni_searcher_search_with_options")
+	if err != nil {
+		return err
+	}
+
+	_searchResultsFreeSym, err = findSymbol(handle, "kjarni_search_results_free")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
-
 // Symbols stored for SyscallN usage
 var (
 	_classResultsFreeSymGlobal uintptr

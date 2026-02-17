@@ -7,9 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
-
-	"github.com/ebitengine/purego"
 )
+
 //go:embed lib/*
 var libFS embed.FS
 
@@ -28,7 +27,7 @@ func loadLibrary() (uintptr, error) {
 
 func doLoadLibrary() (uintptr, error) {
 	var embeddedPath, fileName string
-	// todo: macos
+
 	switch runtime.GOOS {
 	case "linux":
 		embeddedPath = "lib/linux_amd64/libkjarni_ffi.so"
@@ -55,10 +54,5 @@ func doLoadLibrary() (uintptr, error) {
 		return 0, fmt.Errorf("writing library: %w", err)
 	}
 
-	handle, err := purego.Dlopen(libPath, purego.RTLD_NOW|purego.RTLD_GLOBAL)
-	if err != nil {
-		return 0, fmt.Errorf("loading library: %w", err)
-	}
-
-	return handle, nil
+	return openLibrary(libPath)
 }
