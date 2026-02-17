@@ -189,7 +189,7 @@ func parseSearchResults(results ffiSearchResults) []SearchResult {
 }
 
 func freeSearchResults(results ffiSearchResults) {
-	if _searchResultsFreeSym != 0 {
-		purego.SyscallN(_searchResultsFreeSym, results.Results, results.Len)
-	}
+    if _searchResultsFreeSym != 0 {
+        purego.SyscallN(_searchResultsFreeSym, uintptr(unsafe.Pointer(&results)))
+    }
 }
